@@ -28,7 +28,71 @@ This project demonstrates a touchless automatic dustbin using an Arduino Uno, HC
 3. The servo motor rotates and opens the dustbin lid.
 4. After a short delay, the servo returns to its original position and closes the lid.
 
-## Circuit Connections
+## Code
+#include <Servo.h>
+
+Servo dustbinServo;
+
+// Ultrasonic Sensor Pins
+const int trigPin = 9;
+const int echoPin = 10;
+
+// Servo Pin
+const int servoPin = 6;
+
+// Variables
+long duration;
+int distance;
+
+void setup()
+{
+  pinMode(trigPin, OUTPUT);
+  pinMode(echoPin, INPUT);
+
+  dustbinServo.attach(servoPin);
+
+  // Lid closed position
+  dustbinServo.write(0);
+
+  Serial.begin(9600);
+}
+
+void loop()
+{
+  // Send ultrasonic pulse
+  digitalWrite(trigPin, LOW);
+  delayMicroseconds(2);
+
+  digitalWrite(trigPin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigPin, LOW);
+
+  // Read echo
+  duration = pulseIn(echoPin, HIGH);
+
+  // Calculate distance
+  distance = duration * 0.034 / 2;
+
+  Serial.print("Distance: ");
+  Serial.print(distance);
+  Serial.println(" cm");
+
+  // If hand is within 20 cm
+  if (distance > 0 && distance <= 20)
+  {
+    Serial.println("Object Detected - Opening Lid");
+
+    // Open lid
+    dustbinServo.write(90);
+    delay(3000);
+
+    // Close lid
+    dustbinServo.write(0);
+    delay(1000);
+  }
+
+  delay(200);
+}
 
 ### HC-SR04 Ultrasonic Sensor
 
